@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+
+
+
+
+{% block content %}
+
+
+<div class="table-title">
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" role="alert">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <div class="col-sm-6">
+            <h2>Your <b>Tasks</b></h2>
+        </div>
+        <div class="col-sm-6">
+            <form action="{% url 'delete_all_view' %}" method="POST" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" style="background:red; border:none; cursor:pointer;">
+                    <i class="material-icons">&#xE872;</i>Delete All Tasks
+                </button>
+            </form>
+            <button type="button" class="btn btn-danger" id="delete-selected" style="background: orange;">
+                <i class="material-icons">&#xE15C;</i>
+                <span>Delete Selected Tasks</span>
+            </button>
+            <a href="{% url 'todo_create_view' %}" class="btn btn-success">
+                <i class="material-icons">&#xE147;</i> <span>Add New Task</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>
+                <span class="custom-checkbox">
+                    <input type="checkbox" id="selectAll">
+                    <label for="selectAll"></label>
+                </span>
+            </th>
+            <th>Title</th>
+            <th>Task</th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for todo in todos %}
+        <tr>
+            <td>
+                <input type="checkbox" name="selected_rows" value="{{todo.id}}" class="row-checkbox">
+            </td>
+            <td>{{todo.title}}</td>
+            <td>{{todo.task}}</td>
+            <td>
+                <a href="{% url 'todo_update_view' todo.id %}" class="edit"><i class="material-icons"
+                        data-toggle="tooltip" title="Edit">&#xE254;</i></a>
+            </td>
+            <td>
+                <form action="{% url 'todo_delete_view' todo.id %}" method="POST" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="delete" style="background:none; border:none; cursor:pointer;">
+                        <i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i>
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% empty %}
+        <h1 style="margin: auto;">You Got no Pending Tasks</h1>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="clearfix">
+    <div class="hint-text">Showing {{tasks_count}} task/s</div>
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById("delete-selected").addEventListener("click", function () {
+        // Get all checked checkboxes
+        const selectedIds = Array.from(document.querySelectorAll("input[name='selected_rows']:checked")).map(cb => cb.value);
+
+        if (selectedIds.length > 0) {
+            // Create a form dynamically
+            const form = document.createElement("form");
+            form.method = "post";
+            form.action = "{% url 'delete_selected_view' %}";
+
+            // Add CSRF token for security
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const csrfInput = document.createElement("input");
+            csrfInput.type = "hidden";
+            csrfInput.name = "csrfmiddlewaretoken";
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+
+            // Append each selected ID as a hidden input
+            selectedIds.forEach(id => {
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = "selected_rows";
+                input.value = id;
+                form.appendChild(input);
+            });
+
+            // Append and submit the form
+            document.body.appendChild(form);
+            form.submit();
+        } else {
+            alert("No rows selected!");
+        }
+    });
+
+</script>
+{% endblock %}

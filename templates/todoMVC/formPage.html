@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="table-title">
+    <div class="row">
+        <div class="col-sm-6">
+            <h2>Your <b>Tasks</b></h2>
+        </div>        
+    </div>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="form-group">
+        <label for="id_title">Title</label>
+        {{ form.title }}
+    </div>
+    <div class="form-group">
+        <label for="id_task">Task</label>
+        {{ form.task }}
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+
+{% endblock %}
+
+
